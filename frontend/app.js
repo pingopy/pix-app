@@ -21,10 +21,9 @@
 
   let currentPaymentId = null;
 
-  // API Configuration
-  const API_TOKEN = '6sfmOt3FsP2vQx2clc0n4/U4EoUaC0g0:zt5rAbMCHxb9lRufCfdaGO8s6y7nkyTxKLamH9f/5H52IhfAEngUcgGI92nTWnwZ';
-  const BASE_URL = 'https://public-api.paggpix.com';
-  const CNPJ = '26357096000133';
+  const API_TOKEN = process.env.API_TOKEN;
+  const BASE_URL = process.env.BASE_URL;
+  const CNPJ = process.env.CNPJ;
 
   /* Utilidades */
   function showToast(message, type = 'info', duration = 4000) {
