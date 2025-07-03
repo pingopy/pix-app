@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gerar Pagamento PIX • PaggPix Demo</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="container py-16">
+      <h1 class="mb-8">Gerador de Pagamento PIX</h1>
+
+      <!-- Formulário -->
+      <form id="payment-form" class="card card__body flex flex-col gap-16" autocomplete="off">
+        <div class="form-group">
+          <label for="payment-value" class="form-label">Valor (R$)</label>
+          <input
+            type="number"
+            step="0.01"
+            min="0.01"
+            id="payment-value"
+            class="form-control"
+            placeholder="Ex: 9.99"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="payment-description" class="form-label">Descrição (opcional)</label>
+          <textarea
+            id="payment-description"
+            class="form-control"
+            rows="3"
+            placeholder="Ex: Pagamento pedido #999"
+          ></textarea>
+        </div>
+
+        <button id="generate-btn" type="submit" class="btn btn--primary btn--lg self-start">
+          Gerar PIX
+        </button>
+      </form>
+
+      <!-- Resultado -->
+      <section id="result-section" class="hidden card mt-8">
+        <div class="card__body flex flex-col gap-16">
+          <h2>Pagamento Criado ✅</h2>
+
+          <div>
+            <p class="m-0"><strong>Valor:</strong> R$ <span class="result-value valor-destaque"></span></p>
+            <p class="m-0"><strong>Descrição:</strong> <span class="result-description"></span></p>
+            <p class="m-0"><strong>ID da Transação:</strong> <span class="result-id"></span></p>
+            <p class="m-0"><strong>Status atual:</strong> <span id="status-badge" class="status status--info">PENDENTE</span></p>
+          </div>
+
+          <div class="flex flex-col gap-8">
+            <label for="pix-code" class="form-label">Código PIX (copia e cola)</label>
+            <textarea id="pix-code" readonly class="form-control pix-code" rows="3"></textarea>
+            <div class="flex gap-8">
+              <button id="copy-btn" class="btn btn--secondary btn--sm">Copiar</button>
+              <button id="check-status-btn" class="btn btn--outline btn--sm">Consultar Status</button>
+              <button id="new-payment-btn" class="btn btn--outline btn--sm">Novo PIX</button>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Toasts -->
+    <div id="toast-container" aria-live="assertive"></div>
+
+    <script src="app.js"></script>
+  </body>
+</html>
