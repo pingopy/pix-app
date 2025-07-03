@@ -21,9 +21,8 @@
 
   let currentPaymentId = null;
 
-  const API_TOKEN = process.env.API_TOKEN;
-  const BASE_URL = process.env.BASE_URL;
-  const CNPJ = process.env.CNPJ;
+  // Agora só precisa da URL do backend:
+  const BASE_URL = 'https://app-pix-r35l.onrender.com/api';
 
   /* Utilidades */
   function showToast(message, type = 'info', duration = 4000) {
@@ -97,13 +96,11 @@
       const response = await fetch(`${BASE_URL}/payments`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${API_TOKEN}`
+          'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ 
-          cnpj: CNPJ,
-          value: value.toFixed(2), 
-          description 
+        body: JSON.stringify({
+          value: value.toFixed(2),
+          description
         }),
       });
 
@@ -153,11 +150,7 @@
     toggleButtonLoading(checkStatusBtn, true);
 
     try {
-      const response = await fetch(`${BASE_URL}/payments/${currentPaymentId}`, {
-        headers: {
-          'Authorization': `Bearer ${API_TOKEN}`
-        }
-      });
+      const response = await fetch(`${BASE_URL}/payments/${currentPaymentId}`);
       
       if (!response.ok) {
         const errorData = await response.json();
