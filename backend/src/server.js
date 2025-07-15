@@ -17,6 +17,11 @@ app.use(express.json());
 // Servir arquivos estáticos (frontend)
 app.use(express.static(path.join(__dirname, '../../frontend')));
 
+// Redirecionar raiz para login
+app.get('/', (req, res) => {
+  res.redirect('/login.html');
+});
+
 // Rotas da API
 app.use('/api/auth', authRoutes);
 app.use('/api/payments', authenticateToken, paymentsRoutes);
