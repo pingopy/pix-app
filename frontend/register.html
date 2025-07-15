@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - PIX App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .register-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            width: 100%;
+            max-width: 900px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+
+        .register-form {
+            padding: 40px;
+        }
+
+        .register-title {
+            font-size: 28px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group .input-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 18px;
+        }
+
+        .form-group.has-icon {
+            position: relative;
+        }
+
+        .form-group.has-icon input {
+            padding-left: 45px;
+        }
+
+        .register-button {
+            width: 100%;
+            background: #1890ff;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .register-button:hover {
+            background: #096dd9;
+        }
+
+        .register-button:active {
+            transform: translateY(1px);
+        }
+
+        .login-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .login-link a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .login-link a:hover {
+            text-decoration: underline;
+        }
+
+        .api-requirements {
+            background: #f8f9fa;
+            padding: 40px;
+            border-left: 1px solid #e8e8e8;
+        }
+
+        .api-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+
+        .api-description {
+            color: #666;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .requirement-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            border-left: 4px solid #52c41a;
+        }
+
+        .requirement-icon {
+            background: #52c41a;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 12px;
+            font-size: 14px;
+        }
+
+        .requirement-text {
+            color: #2c3e50;
+            font-weight: 500;
+        }
+
+        .error-message {
+            color: #ff4d4f;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+            padding: 10px;
+            background: #fff2f0;
+            border-radius: 8px;
+            border: 1px solid #ffccc7;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .register-container {
+                grid-template-columns: 1fr;
+                margin: 20px;
+            }
+            
+            .register-form,
+            .api-requirements {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-form">
+            <h1 class="register-title">REGISTER</h1>
+            <form id="register-form">
+                <div class="form-group has-icon">
+                    <label for="register-username">Full name</label>
+                    <span class="input-icon">👤</span>
+                    <input type="text" id="register-username" placeholder="Full name" required>
+                </div>
+                <div class="form-group has-icon">
+                    <label for="register-email">Email address</label>
+                    <span class="input-icon">📧</span>
+                    <input type="email" id="register-email" placeholder="Email address" required>
+                </div>
+                <div class="form-group has-icon">
+                    <label for="register-password">Password</label>
+                    <span class="input-icon">🔒</span>
+                    <input type="password" id="register-password" placeholder="Confirm password" required>
+                </div>
+                <div class="form-group has-icon">
+                    <label for="register-password2">Confirm Password</label>
+                    <span class="input-icon">🔒</span>
+                    <input type="password" id="register-password2" placeholder="Confirm password" required>
+                </div>
+                <div class="form-group has-icon">
+                    <label for="register-cnpj">CNPJ/CPF</label>
+                    <span class="input-icon">📄</span>
+                    <input type="text" id="register-cnpj" placeholder="CNPJ ou CPF" required>
+                </div>
+                <div class="form-group has-icon">
+                    <label for="register-token">Token da API PaggPix</label>
+                    <span class="input-icon">🔑</span>
+                    <input type="text" id="register-token" placeholder="Token da API PaggPix" required>
+                </div>
+                <button type="submit" class="register-button">Sign Up</button>
+            </form>
+            <div class="login-link">
+                <p>Já tem conta? <a href="login.html">Entrar</a></p>
+            </div>
+            <div id="register-error" class="error-message"></div>
+        </div>
+        
+        <div class="api-requirements">
+            <h2 class="api-title">API REQUIREMENTS</h2>
+            <p class="api-description">
+                Before using our API, please make sure your application meets the following requirements:
+            </p>
+            <div class="requirement-item">
+                <div class="requirement-icon">✓</div>
+                <div class="requirement-text">Use HTTPS for secure requests</div>
+            </div>
+            <div class="requirement-item">
+                <div class="requirement-icon">✓</div>
+                <div class="requirement-text">Authenticate API requests</div>
+            </div>
+            <div class="requirement-item">
+                <div class="requirement-icon">✓</div>
+                <div class="requirement-text">Handle rate limiting</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showError(message) {
+            const errorDiv = document.getElementById('register-error');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
+            setTimeout(() => {
+                errorDiv.classList.remove('show');
+            }, 5000);
+        }
+
+        // Cadastro
+        document.getElementById('register-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('register-username').value;
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            const password2 = document.getElementById('register-password2').value;
+            const cnpj = document.getElementById('register-cnpj').value;
+            const api_token = document.getElementById('register-token').value;
+            const button = document.querySelector('.register-button');
+            
+            if (password !== password2) {
+                showError('Senhas não coincidem');
+                return;
+            }
+            
+            // Loading state
+            button.textContent = 'Cadastrando...';
+            button.disabled = true;
+            
+            try {
+                const res = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password, api_token, cnpj })
+                });
+                const data = await res.json();
+                
+                if (res.ok) {
+                    window.location.href = 'login.html';
+                } else {
+                    showError(data.error || 'Erro ao cadastrar');
+                }
+            } catch (error) {
+                showError('Erro de conexão. Tente novamente.');
+            } finally {
+                button.textContent = 'Sign Up';
+                button.disabled = false;
+            }
+        };
+    </script>
+</body>
+</html>

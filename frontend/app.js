@@ -1,183 +1,145 @@
-// Frontend logic for PaggPix Demo
-
-(function () {
-  const form = document.getElementById('payment-form');
-  const valueInput = document.getElementById('payment-value');
-  const descInput = document.getElementById('payment-description');
-  const generateBtn = document.getElementById('generate-btn');
-
-  const resultSection = document.getElementById('result-section');
-  const resultValue = document.querySelector('.result-value');
-  const resultDesc = document.querySelector('.result-description');
-  const resultId = document.querySelector('.result-id');
-  const statusBadge = document.getElementById('status-badge');
-  const pixCodeTextarea = document.getElementById('pix-code');
-
-  const copyBtn = document.getElementById('copy-btn');
-  const checkStatusBtn = document.getElementById('check-status-btn');
-  const newPaymentBtn = document.getElementById('new-payment-btn');
-
-  const toastContainer = document.getElementById('toast-container');
-
-  let currentPaymentId = null;
-
-  // Agora só precisa da URL do backend:
-  const BASE_URL = 'https://app-pix-r35l.onrender.com/api';
-
-  /* Utilidades */
-  function showToast(message, type = 'info', duration = 4000) {
-    const toast = document.createElement('div');
-    toast.className = `toast toast--${type}`;
-    toast.textContent = message;
-    toastContainer.appendChild(toast);
-
-    setTimeout(() => {
-      toast.classList.add('fade-out');
-      toast.addEventListener('transitionend', () => toast.remove());
-    }, duration);
+// Funções utilitárias para o token JWT
+function setToken(token) { localStorage.setItem('token', token); }
+function getToken() { return localStorage.getItem('token'); }
+function clearToken() { localStorage.removeItem('token'); }
+function redirectIfNotLogged() {
+  if (!getToken() && window.location.pathname.endsWith('dashboard.html')) {
+    window.location.href = 'login.html';
   }
+}
 
-  function setStatus(statusStr) {
-    const status = String(statusStr).toUpperCase();
-    statusBadge.textContent = status;
-
-    // Reset classes
-    statusBadge.classList.remove(
-      'status--success',
-      'status--error',
-      'status--warning',
-      'status--info'
-    );
-
-    switch (status) {
-      case 'COMPLETED':
-      case 'PAID':
-      case 'CONCLUIDO':
-        statusBadge.classList.add('status--success');
-        break;
-      case 'PENDING':
-      case 'AGUARDANDO':
-      case 'WAITING':
-        statusBadge.classList.add('status--info');
-        break;
-      case 'EXPIRED':
-        statusBadge.classList.add('status--warning');
-        break;
-      default:
-        statusBadge.classList.add('status--error');
-    }
-  }
-
-  function toggleButtonLoading(btn, isLoading) {
-    if (isLoading) {
-      btn.classList.add('loading');
-      btn.disabled = true;
-    } else {
-      btn.classList.remove('loading');
-      btn.disabled = false;
-    }
-  }
-
-  /* Event Handlers */
-  form.addEventListener('submit', async (e) => {
+// Login
+if (document.getElementById('login-form')) {
+  document.getElementById('login-form').onsubmit = async (e) => {
     e.preventDefault();
+    const email = document.getElementById('login-email').value;
+    const password = document.getElementById('login-password').value;
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (res.ok && data.token) {
+        setToken(data.token);
+        window.location.href = 'dashboard.html';
+      } else {
+        document.getElementById('login-error').textContent = data.error || 'Erro ao logar.';
+      }
+    } catch {
+      document.getElementById('login-error').textContent = 'Erro de conexão.';
+    }
+  };
+}
 
-    const value = parseFloat(valueInput.value.replace(',', '.'));
-    if (Number.isNaN(value) || value <= 0) {
-      showToast('Digite um valor válido.', 'error');
+// Cadastro
+if (document.getElementById('register-form')) {
+  document.getElementById('register-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const username = document.getElementById('register-username').value;
+    const email = document.getElementById('register-email').value;
+    const password = document.getElementById('register-password').value;
+    const password2 = document.getElementById('register-password2').value;
+    const cnpj = document.getElementById('register-cnpj').value;
+    const api_token = document.getElementById('register-token').value;
+    if (password !== password2) {
+      document.getElementById('register-error').textContent = 'Senhas não coincidem.';
       return;
     }
-
-    const description = descInput.value.trim() || `Pagamento de R$ ${value.toFixed(2)}`;
-
-    toggleButtonLoading(generateBtn, true);
-
     try {
-      const response = await fetch(`${BASE_URL}/payments`, {
+      const res = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email, password, api_token, cnpj })
+      });
+      const data = await res.json();
+      if (res.ok) {
+        window.location.href = 'login.html';
+      } else {
+        document.getElementById('register-error').textContent = data.error || 'Erro ao cadastrar.';
+      }
+    } catch {
+      document.getElementById('register-error').textContent = 'Erro de conexão.';
+    }
+  };
+}
+
+// Dashboard (PIX)
+if (document.getElementById('payment-form')) {
+  redirectIfNotLogged();
+
+  // Logout
+  document.getElementById('logout-btn').onclick = () => {
+    clearToken();
+    window.location.href = 'login.html';
+  };
+
+  // Gerar PIX
+  document.getElementById('payment-form').onsubmit = async (e) => {
+    e.preventDefault();
+    const value = parseFloat(document.getElementById('payment-value').value).toFixed(2);
+    const description = document.getElementById('payment-description').value;
+    try {
+      const res = await fetch('/api/payments', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
+          // ENVIO CORRETO DO TOKEN JWT:
+          'Authorization': `Bearer ${getToken()}`
         },
-        body: JSON.stringify({
-          value: value.toFixed(2),
-          description
-        }),
+        body: JSON.stringify({ value, description })
       });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Erro ao gerar pagamento');
+      const data = await res.json();
+      if (res.ok) {
+        document.getElementById('result-section').classList.remove('hidden');
+        document.querySelector('.result-value').textContent = data.value;
+        document.querySelector('.result-description').textContent = data.description || '—';
+        document.querySelector('.result-id').textContent = data.pix_id;
+        document.getElementById('pix-code').value = data.pix_code;
+      } else {
+        alert(data.error || 'Erro ao gerar PIX');
       }
-
-      const data = await response.json();
-
-      // Populate result UI
-      resultValue.textContent = parseFloat(data.value).toFixed(2);
-      resultDesc.textContent = data.description || '—';
-      resultId.textContent = data.pix_id || data.id || '—';
-      pixCodeTextarea.value = data.pix_code || data.code || '';
-      setStatus(data.status || 'PENDING');
-
-      currentPaymentId = data.pix_id || data.id;
-
-      // Show result section
-      resultSection.classList.remove('hidden');
-      form.classList.add('hidden');
-      
-      showToast('Pagamento PIX gerado com sucesso!', 'success');
-    } catch (err) {
-      const message = err?.message || 'Erro ao gerar pagamento.';
-      showToast(message, 'error');
-    } finally {
-      toggleButtonLoading(generateBtn, false);
-    }
-  });
-
-  copyBtn.addEventListener('click', async () => {
-    try {
-      await navigator.clipboard.writeText(pixCodeTextarea.value);
-      showToast('Código PIX copiado!', 'success');
     } catch {
-      // Fallback for older browsers
-      pixCodeTextarea.select();
-      document.execCommand('copy');
-      showToast('Código PIX copiado!', 'success');
+      alert('Erro de conexão.');
     }
-  });
+  };
 
-  checkStatusBtn.addEventListener('click', async () => {
-    if (!currentPaymentId) return;
-    toggleButtonLoading(checkStatusBtn, true);
+  // Copiar código PIX
+  document.getElementById('copy-btn').onclick = () => {
+    navigator.clipboard.writeText(document.getElementById('pix-code').value);
+    document.getElementById('copy-btn').textContent = 'Copiado!';
+    setTimeout(() => document.getElementById('copy-btn').textContent = 'Copiar', 1500);
+  };
 
+  // Novo pagamento
+  document.getElementById('new-payment-btn').onclick = () => {
+    document.getElementById('result-section').classList.add('hidden');
+    document.getElementById('payment-form').reset();
+  };
+
+  // Histórico
+  async function loadHistory() {
     try {
-      const response = await fetch(`${BASE_URL}/payments/${currentPaymentId}`);
-      
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Erro ao consultar status');
+      const res = await fetch('/api/payments/history', {
+        headers: {
+          // ENVIO CORRETO DO TOKEN JWT:
+          'Authorization': `Bearer ${getToken()}`
+        }
+      });
+      const data = await res.json();
+      if (res.ok) {
+        const list = document.getElementById('history-list');
+        list.innerHTML = '';
+        data.forEach(item => {
+          const li = document.createElement('li');
+          li.textContent = `[${item.created_at}] R$ ${item.value} - ${item.status}`;
+          list.appendChild(li);
+        });
       }
-      
-      const data = await response.json();
-      setStatus(data.status);
-      showToast('Status atualizado.', 'info');
-    } catch (err) {
-      const message = err?.message || 'Erro ao consultar status.';
-      showToast(message, 'error');
-    } finally {
-      toggleButtonLoading(checkStatusBtn, false);
+    } catch {
+      // Silencia erro de histórico
     }
-  });
-
-  newPaymentBtn.addEventListener('click', () => {
-    // Reset form & UI
-    valueInput.value = '';
-    descInput.value = '';
-    form.classList.remove('hidden');
-    resultSection.classList.add('hidden');
-    currentPaymentId = null;
-    valueInput.focus();
-  });
-
-  // Focus on value input when page loads
-  valueInput.focus();
-})();
+  }
+  loadHistory();
+}

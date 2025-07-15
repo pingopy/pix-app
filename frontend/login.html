@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - PIX App</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .login-title {
+            font-size: 32px;
+            font-weight: 600;
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #555;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px 50px 15px 15px;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-group .input-icon {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 18px;
+        }
+
+        .forgot-password {
+            text-align: right;
+            margin-bottom: 30px;
+        }
+
+        .forgot-password a {
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+
+        .login-button {
+            width: 100%;
+            background: #52c41a;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .login-button:hover {
+            background: #389e0d;
+        }
+
+        .login-button:active {
+            transform: translateY(1px);
+        }
+
+        .register-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .register-link a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+
+        .error-message {
+            color: #ff4d4f;
+            text-align: center;
+            margin-top: 15px;
+            font-size: 14px;
+            padding: 10px;
+            background: #fff2f0;
+            border-radius: 8px;
+            border: 1px solid #ffccc7;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                margin: 20px;
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1 class="login-title">Login</h1>
+        <form id="login-form">
+            <div class="form-group">
+                <input type="email" id="login-email" placeholder="Email" required>
+                <span class="input-icon">📧</span>
+            </div>
+            <div class="form-group">
+                <input type="password" id="login-password" placeholder="Password" required>
+                <span class="input-icon">🔒</span>
+            </div>
+            <div class="forgot-password">
+                <a href="#">Forgot password?</a>
+            </div>
+            <button type="submit" class="login-button">Login</button>
+        </form>
+        <div class="register-link">
+            <p>Não tem conta? <a href="register.html">Cadastre-se</a></p>
+        </div>
+        <div id="login-error" class="error-message"></div>
+    </div>
+
+    <script>
+        // Funções utilitárias
+        function setToken(token) { localStorage.setItem('token', token); }
+        function getToken() { return localStorage.getItem('token'); }
+        function clearToken() { localStorage.removeItem('token'); }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('login-error');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('show');
+            setTimeout(() => {
+                errorDiv.classList.remove('show');
+            }, 5000);
+        }
+
+        // Login
+        document.getElementById('login-form').onsubmit = async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const button = document.querySelector('.login-button');
+            
+            // Loading state
+            button.textContent = 'Entrando...';
+            button.disabled = true;
+            
+            try {
+                const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await res.json();
+                
+                if (res.ok && data.token) {
+                    setToken(data.token);
+                    window.location.href = 'dashboard.html';
+                } else {
+                    showError(data.error || 'Erro ao fazer login');
+                }
+            } catch (error) {
+                showError('Erro de conexão. Tente novamente.');
+            } finally {
+                button.textContent = 'Login';
+                button.disabled = false;
+            }
+        };
+    </script>
+</body>
+</html>
